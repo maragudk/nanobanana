@@ -36,9 +36,10 @@ func (c *Client) WithGenAIClient(client *genai.Client) *Client {
 
 // GenerateRequest represents a request to generate an image.
 type GenerateRequest struct {
-	Prompt     string
-	InputImage io.Reader
-	Count      int
+	Prompt         string
+	InputImage     io.Reader
+	Count          int
+	OutputMIMEType string
 }
 
 // GenerateResponse represents the response from image generation.
@@ -56,6 +57,11 @@ func (c *Client) Generate(ctx context.Context, req GenerateRequest) (*GenerateRe
 	// Otherwise, generate from scratch
 	config := &genai.GenerateImagesConfig{
 		NumberOfImages: int32(req.Count),
+	}
+
+	// Set output MIME type if specified
+	if req.OutputMIMEType != "" {
+		config.OutputMIMEType = req.OutputMIMEType
 	}
 
 	resp, err := c.genaiClient.Models.GenerateImages(ctx, imageModel, req.Prompt, config)
@@ -91,6 +97,11 @@ func (c *Client) editImage(ctx context.Context, req GenerateRequest) (*GenerateR
 	// Use EditImage API
 	config := &genai.EditImageConfig{
 		NumberOfImages: int32(req.Count),
+	}
+
+	// Set output MIME type if specified
+	if req.OutputMIMEType != "" {
+		config.OutputMIMEType = req.OutputMIMEType
 	}
 
 	resp, err := c.genaiClient.Models.EditImage(ctx, imageModel, req.Prompt, []genai.ReferenceImage{genai.NewRawReferenceImage(img, 1)}, config)

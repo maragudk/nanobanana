@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"flag"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"maragu.dev/clir"
 	"maragu.dev/env"
@@ -87,8 +89,9 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 		prompt := fs.Arg(1)
 
 		req := nanobanana.GenerateRequest{
-			Prompt: prompt,
-			Count:  *count,
+			Prompt:         prompt,
+			Count:          *count,
+			OutputMIMEType: mimeTypeFromExtension(outputPath),
 		}
 
 		// If -i flag is set, read the input image
@@ -121,5 +124,20 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 		}
 
 		return nil
+	}
+}
+
+// mimeTypeFromExtension returns the MIME type based on the file extension.
+// Supported formats: png (default), jpg/jpeg
+func mimeTypeFromExtension(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch ext {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	default:
+		// Default to PNG if extension is unknown or missing
+		return "image/png"
 	}
 }

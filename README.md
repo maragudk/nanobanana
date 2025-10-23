@@ -42,6 +42,20 @@ The CLI will automatically load the `.env` file if it exists.
 
 Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey).
 
+## Supported Formats
+
+The CLI automatically detects the output format from the file extension:
+
+- **PNG** (`.png`) - Default format, lossless compression
+- **JPEG** (`.jpg`, `.jpeg`) - Lossy compression, smaller file sizes
+
+If no extension is provided, PNG format is used by default.
+
+```bash
+nanobanana generate image.png "a sunset"  # PNG format
+nanobanana generate image.jpg "a sunset"  # JPEG format
+```
+
 ## Usage
 
 ### Generate an image
@@ -69,8 +83,11 @@ nanobanana generate -i input.png output.png "make the sky more purple"
 ## Examples
 
 ```bash
-# Generate a photorealistic image
+# Generate a photorealistic image (PNG)
 nanobanana generate photo.png "a photorealistic portrait of a cat"
+
+# Generate a JPEG image
+nanobanana generate photo.jpg "a photorealistic portrait of a cat"
 
 # Edit an image
 nanobanana generate -i photo.png edited.png "add sunglasses to the cat"
