@@ -18,7 +18,14 @@ func main() {
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")
 	if apiKey == "" {
-		panic("GOOGLE_API_KEY environment variable is required")
+		os.Stderr.WriteString("Error: GOOGLE_API_KEY environment variable is required\n\n")
+		os.Stderr.WriteString("To use nanobanana, you need a Google API key:\n")
+		os.Stderr.WriteString("  1. Get your API key from https://makersuite.google.com/app/apikey\n")
+		os.Stderr.WriteString("  2. Set it as an environment variable:\n")
+		os.Stderr.WriteString("       export GOOGLE_API_KEY=\"your-api-key-here\"\n")
+		os.Stderr.WriteString("  3. Or create a .env file:\n")
+		os.Stderr.WriteString("       echo \"GOOGLE_API_KEY=your-api-key-here\" > .env\n")
+		os.Exit(1)
 	}
 
 	client := nanobanana.NewClient(apiKey)
