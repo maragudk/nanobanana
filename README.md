@@ -1,4 +1,4 @@
-# nanobanana-cli
+# nanobanana
 
 <img src="logo.png" alt="Logo" width="300" align="right">
 
@@ -13,15 +13,15 @@ Made with ✨sparkles✨ by [maragu](https://www.maragu.dev/): independent softw
 ## Installation
 
 ```bash
-go install maragu.dev/nanobanana/cmd/nanobanana@latest
+go install maragu.dev/nanobanana@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/maragudk/nanobanana-cli
-cd nanobanana-cli
-go build ./cmd/nanobanana
+git clone https://github.com/maragudk/nanobanana
+cd nanobanana
+go build
 ```
 
 ## Configuration
