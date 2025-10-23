@@ -4,7 +4,7 @@
 
 [![Docs](https://pkg.go.dev/badge/maragu.dev/nanobanana)](https://pkg.go.dev/maragu.dev/nanobanana)
 
-A Go CLI tool for generating and editing images using Google's Imagen 4 API.
+A Go CLI tool for generating and editing images using Google's Gemini Flash 2.5 Image API.
 
 ⚠️ THIS APP IS VIBE-CODED BY AN AI, USE AT YOUR OWN RISK! ⚠️
 
@@ -26,7 +26,7 @@ go build
 
 ## Configuration
 
-This tool uses Google's Gemini API with the Imagen 4 model. Set your Google API key as an environment variable:
+This tool uses Google's Gemini API with the Gemini Flash 2.5 Image model. Set your Google API key as an environment variable:
 
 ```bash
 export GOOGLE_API_KEY="your-google-api-key-here"
