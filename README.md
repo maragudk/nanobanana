@@ -122,3 +122,9 @@ nanobanana generate -pro output.png "modern infographic about climate change wit
 # Edit with Nano Banana Pro for better results
 nanobanana generate -pro -i logo.png logo-wizard.png "add a little wizard hat to the banana"
 ```
+
+## How it works
+
+Here's a visual overview of how the CLI works internally:
+
+![Architecture diagram](architecture.png)
