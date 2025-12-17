@@ -3,7 +3,7 @@ module maragu.dev/nanobanana
 go 1.25
 
 require (
-	google.golang.org/genai v1.32.0
+	google.golang.org/genai v1.38.0
 	maragu.dev/clir v0.0.0-20251023082840-ecd900cef095
 	maragu.dev/env v0.2.0
 	maragu.dev/errors v0.3.0
