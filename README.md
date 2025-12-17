@@ -4,7 +4,7 @@
 
 [![Docs](https://pkg.go.dev/badge/maragu.dev/nanobanana)](https://pkg.go.dev/maragu.dev/nanobanana)
 
-A Go CLI tool for generating and editing images using Google's Gemini Flash 2.5 Image API.
+A Go CLI tool for generating and editing images using Google's Gemini image generation models (Nano Banana and Nano Banana Pro).
 
 ⚠️ THIS APP IS VIBE-CODED BY AN AI, USE AT YOUR OWN RISK! ⚠️
 
@@ -26,7 +26,12 @@ go build
 
 ## Configuration
 
-This tool uses Google's Gemini API with the Gemini Flash 2.5 Image model. Set your Google API key as an environment variable:
+This tool uses Google's Gemini API with two image generation models:
+
+- **Nano Banana** (`gemini-2.5-flash-image`) - Fast, cost-effective image generation (default)
+- **Nano Banana Pro** (`gemini-3-pro-image-preview`) - Higher quality with advanced features like better text rendering, higher resolution (up to 4K), and Google Search grounding
+
+Set your Google API key as an environment variable:
 
 ```bash
 export GOOGLE_API_KEY="your-google-api-key-here"
@@ -72,6 +77,22 @@ Generate multiple variations:
 nanobanana generate -count 3 output.png "a beautiful sunset over mountains"
 ```
 
+### Use Nano Banana Pro for higher quality
+
+Use the `-pro` flag to generate images with Nano Banana Pro for higher quality output:
+
+```bash
+nanobanana generate -pro output.png "professional product photo"
+```
+
+Nano Banana Pro is recommended when you need:
+- High-resolution output (up to 4K)
+- Legible text in images (infographics, menus, diagrams)
+- Professional-quality images
+- Complex multi-turn editing workflows
+
+Note: Nano Banana Pro is slower and more expensive than the standard model, but produces significantly better results for professional use cases.
+
 ### Edit an existing image
 
 Edit an image using natural language instructions:
@@ -94,10 +115,16 @@ nanobanana generate -i photo.png edited.png "add sunglasses to the cat"
 
 # Generate multiple variations
 nanobanana generate -count 5 variations.png "abstract art with vibrant colors"
+
+# Use Nano Banana Pro for high-quality professional images
+nanobanana generate -pro output.png "modern infographic about climate change with legible text"
+
+# Edit with Nano Banana Pro for better results
+nanobanana generate -pro -i logo.png logo-wizard.png "add a little wizard hat to the banana"
 ```
 
-## License
+## How it works
 
-[MIT](LICENSE)
+Here's a visual overview of how the CLI works internally:
 
-[Contact me at markus@maragu.dk](mailto:markus@maragu.dk) for consulting work, or perhaps an invoice to support this project?
+![Architecture diagram](architecture.png)
