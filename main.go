@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,13 +21,13 @@ func main() {
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")
 	if apiKey == "" {
-		os.Stderr.WriteString("Error: GOOGLE_API_KEY environment variable is required\n\n")
-		os.Stderr.WriteString("To use nanobanana, you need a Google API key:\n")
-		os.Stderr.WriteString("  1. Get your API key from https://makersuite.google.com/app/apikey\n")
-		os.Stderr.WriteString("  2. Set it as an environment variable:\n")
-		os.Stderr.WriteString("       export GOOGLE_API_KEY=\"your-api-key-here\"\n")
-		os.Stderr.WriteString("  3. Or create a .env file:\n")
-		os.Stderr.WriteString("       echo \"GOOGLE_API_KEY=your-api-key-here\" > .env\n")
+		fmt.Fprintf(os.Stderr, "Error: GOOGLE_API_KEY environment variable is required\n\n")
+		fmt.Fprintf(os.Stderr, "To use nanobanana, you need a Google API key:\n")
+		fmt.Fprintf(os.Stderr, "  1. Get your API key from https://makersuite.google.com/app/apikey\n")
+		fmt.Fprintf(os.Stderr, "  2. Set it as an environment variable:\n")
+		fmt.Fprintf(os.Stderr, "       export GOOGLE_API_KEY=\"your-api-key-here\"\n")
+		fmt.Fprintf(os.Stderr, "  3. Or create a .env file:\n")
+		fmt.Fprintf(os.Stderr, "       echo \"GOOGLE_API_KEY=your-api-key-here\" > .env\n")
 		os.Exit(1)
 	}
 
