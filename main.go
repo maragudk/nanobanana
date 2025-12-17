@@ -61,9 +61,13 @@ func helpHandler(ctx clir.Context) error {
 	ctx.Println("  # Edit an existing image")
 	ctx.Println("  nanobanana generate -i input.png output.png \"make the sky purple\"")
 	ctx.Println("")
+	ctx.Println("  # Use Nano Banana Pro for higher quality")
+	ctx.Println("  nanobanana generate -pro output.png \"professional product photo\"")
+	ctx.Println("")
 	ctx.Println("Flags:")
 	ctx.Println("  -i string     Input image path for editing")
 	ctx.Println("  -count int    Number of images to generate (default 1)")
+	ctx.Println("  -pro          Use Nano Banana Pro for higher quality (slower, more expensive)")
 	ctx.Println("")
 	ctx.Println("Configuration:")
 	ctx.Println("  Set GOOGLE_API_KEY environment variable or create a .env file")
@@ -75,6 +79,7 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 		fs := flag.NewFlagSet("generate", flag.ContinueOnError)
 		inputImage := fs.String("i", "", "input image path for editing")
 		count := fs.Int("count", 1, "number of images to generate")
+		usePro := fs.Bool("pro", false, "use Nano Banana Pro (higher quality, slower)")
 
 		if err := fs.Parse(ctx.Args); err != nil {
 			return errors.Wrap(err, "failed to parse flags")
@@ -88,10 +93,17 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 		outputPath := fs.Arg(0)
 		prompt := fs.Arg(1)
 
+		// Select model based on --pro flag
+		model := nanobanana.ModelNanoBanana
+		if *usePro {
+			model = nanobanana.ModelNanoBananaPro
+		}
+
 		req := nanobanana.GenerateRequest{
 			Prompt:         prompt,
 			Count:          *count,
 			OutputMIMEType: mimeTypeFromExtension(outputPath),
+			Model:          model,
 		}
 
 		// If -i flag is set, read the input image

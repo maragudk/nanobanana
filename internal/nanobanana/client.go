@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	imageModel = "gemini-2.5-flash-image"
+	ModelNanoBanana    = "gemini-2.5-flash-image"
+	ModelNanoBananaPro = "gemini-3-pro-image-preview"
 )
 
 // Client is a Nano Banana API client.
@@ -40,6 +41,7 @@ type GenerateRequest struct {
 	InputImage     io.Reader
 	Count          int
 	OutputMIMEType string
+	Model          string // Model to use (ModelNanoBanana or ModelNanoBananaPro)
 }
 
 // GenerateResponse represents the response from image generation.
@@ -83,10 +85,16 @@ func (c *Client) Generate(ctx context.Context, req GenerateRequest) (*GenerateRe
 	// Note: Output image format is not configurable in GenerateContent API
 	// Images are returned in a default format
 
-	// Generate images (Gemini 2.5 Flash Image generates one at a time)
+	// Use the specified model, default to Nano Banana if not set
+	model := req.Model
+	if model == "" {
+		model = ModelNanoBanana
+	}
+
+	// Generate images (one at a time)
 	var images [][]byte
 	for i := 0; i < req.Count; i++ {
-		resp, err := c.genaiClient.Models.GenerateContent(ctx, imageModel, contents, config)
+		resp, err := c.genaiClient.Models.GenerateContent(ctx, model, contents, config)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to generate content")
 		}
