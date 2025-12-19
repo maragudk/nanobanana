@@ -56,9 +56,6 @@ func helpHandler(ctx clir.Context) error {
 	ctx.Println("  # Generate an image")
 	ctx.Println("  nanobanana generate output.png \"a beautiful sunset over mountains\"")
 	ctx.Println("")
-	ctx.Println("  # Generate multiple variations")
-	ctx.Println("  nanobanana generate -count 3 output.png \"abstract art\"")
-	ctx.Println("")
 	ctx.Println("  # Edit an existing image")
 	ctx.Println("  nanobanana generate -i input.png output.png \"make the sky purple\"")
 	ctx.Println("")
@@ -67,7 +64,6 @@ func helpHandler(ctx clir.Context) error {
 	ctx.Println("")
 	ctx.Println("Flags:")
 	ctx.Println("  -i string     Input image path for editing")
-	ctx.Println("  -count int    Number of images to generate (default 1)")
 	ctx.Println("  -pro          Use Nano Banana Pro for higher quality (slower, more expensive)")
 	ctx.Println("")
 	ctx.Println("Configuration:")
@@ -79,7 +75,6 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 	return func(ctx clir.Context) error {
 		fs := flag.NewFlagSet("generate", flag.ContinueOnError)
 		inputImage := fs.String("i", "", "input image path for editing")
-		count := fs.Int("count", 1, "number of images to generate")
 		usePro := fs.Bool("pro", false, "use Nano Banana Pro (higher quality, slower)")
 
 		if err := fs.Parse(ctx.Args); err != nil {
@@ -88,7 +83,7 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 
 		// Expect: [output-path] [prompt/instructions]
 		if fs.NArg() < 2 {
-			return errors.New("usage: nanobanana generate [-i input-image] [-count N] <output-path> <prompt>")
+			return errors.New("usage: nanobanana generate [-i input-image] <output-path> <prompt>")
 		}
 
 		outputPath := fs.Arg(0)
@@ -102,7 +97,6 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 
 		req := nanobanana.GenerateRequest{
 			Prompt:         prompt,
-			Count:          *count,
 			OutputMIMEType: mimeTypeFromExtension(outputPath),
 			Model:          model,
 		}

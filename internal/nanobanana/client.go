@@ -39,7 +39,6 @@ func (c *Client) WithGenAIClient(client *genai.Client) *Client {
 type GenerateRequest struct {
 	Prompt         string
 	InputImage     io.Reader
-	Count          int
 	OutputMIMEType string
 	Model          string // Model to use (ModelNanoBanana or ModelNanoBananaPro)
 }
@@ -91,39 +90,36 @@ func (c *Client) Generate(ctx context.Context, req GenerateRequest) (*GenerateRe
 		model = ModelNanoBanana
 	}
 
-	// Generate images (one at a time)
-	var images [][]byte
-	for i := 0; i < req.Count; i++ {
-		resp, err := c.genaiClient.Models.GenerateContent(ctx, model, contents, config)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to generate content")
-		}
-
-		// Extract image from response
-		if len(resp.Candidates) == 0 {
-			return nil, errors.New("no candidates in response")
-		}
-
-		candidate := resp.Candidates[0]
-		if candidate.Content == nil {
-			return nil, errors.New("no content in candidate")
-		}
-
-		// Find the image part
-		var imageData []byte
-		for _, part := range candidate.Content.Parts {
-			if part.InlineData != nil && part.InlineData.Data != nil {
-				imageData = part.InlineData.Data
-				break
-			}
-		}
-
-		if imageData == nil {
-			return nil, errors.New("no image data in response")
-		}
-
-		images = append(images, imageData)
+	// Generate image
+	resp, err := c.genaiClient.Models.GenerateContent(ctx, model, contents, config)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to generate content")
 	}
+
+	// Extract image from response
+	if len(resp.Candidates) == 0 {
+		return nil, errors.New("no candidates in response")
+	}
+
+	candidate := resp.Candidates[0]
+	if candidate.Content == nil {
+		return nil, errors.New("no content in candidate")
+	}
+
+	// Find the image part
+	var imageData []byte
+	for _, part := range candidate.Content.Parts {
+		if part.InlineData != nil && part.InlineData.Data != nil {
+			imageData = part.InlineData.Data
+			break
+		}
+	}
+
+	if imageData == nil {
+		return nil, errors.New("no image data in response")
+	}
+
+	images := [][]byte{imageData}
 
 	return &GenerateResponse{Images: images}, nil
 }

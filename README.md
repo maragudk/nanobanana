@@ -71,12 +71,6 @@ Generate an image from a text prompt:
 nanobanana generate output.png "a beautiful sunset over mountains"
 ```
 
-Generate multiple variations:
-
-```bash
-nanobanana generate -count 3 output.png "a beautiful sunset over mountains"
-```
-
 ### Use Nano Banana Pro for higher quality
 
 Use the `-pro` flag to generate images with Nano Banana Pro for higher quality output:
@@ -112,9 +106,6 @@ nanobanana generate photo.jpg "a photorealistic portrait of a cat"
 
 # Edit an image
 nanobanana generate -i photo.png edited.png "add sunglasses to the cat"
-
-# Generate multiple variations
-nanobanana generate -count 5 variations.png "abstract art with vibrant colors"
 
 # Use Nano Banana Pro for high-quality professional images
 nanobanana generate -pro output.png "modern infographic about climate change with legible text"
