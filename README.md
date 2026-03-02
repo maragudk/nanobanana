@@ -26,10 +26,11 @@ go build
 
 ## Configuration
 
-This tool uses Google's Gemini API with two image generation models:
+This tool uses Google's Gemini API with three image generation models:
 
 - **Nano Banana** (`gemini-2.5-flash-image`) - Fast, cost-effective image generation (default)
-- **Nano Banana Pro** (`gemini-3-pro-image-preview`) - Higher quality with advanced features like better text rendering, higher resolution (up to 4K), and Google Search grounding
+- **Nano Banana 2** (`gemini-3.1-flash-image-preview`) - Improved quality, extended aspect ratios (up to 8:1), resolution options (0.5K-4K), and search grounding
+- **Nano Banana Pro** (`gemini-3-pro-image-preview`) - Highest quality with advanced features like better text rendering, higher resolution (up to 4K), and Google Search grounding
 
 Set your Google API key as an environment variable:
 
@@ -71,9 +72,24 @@ Generate an image from a text prompt:
 nanobanana generate output.png "a beautiful sunset over mountains"
 ```
 
-### Use Nano Banana Pro for higher quality
+### Use Nano Banana 2 for improved quality
 
-Use the `-pro` flag to generate images with Nano Banana Pro for higher quality output:
+Use the `-v2` flag to generate images with Nano Banana 2, the upgraded flash model:
+
+```bash
+nanobanana generate -v2 output.png "a beautiful sunset over mountains"
+```
+
+Nano Banana 2 offers over the standard model:
+- Improved image quality and consistency
+- Extended aspect ratios (1:4, 4:1, 1:8, 8:1)
+- Resolution options (0.5K, 1K, 2K, 4K)
+- Search grounding support
+- Improved i18n text rendering
+
+### Use Nano Banana Pro for highest quality
+
+Use the `-pro` flag to generate images with Nano Banana Pro for the highest quality output:
 
 ```bash
 nanobanana generate -pro output.png "professional product photo"
@@ -85,7 +101,7 @@ Nano Banana Pro is recommended when you need:
 - Professional-quality images
 - Complex multi-turn editing workflows
 
-Note: Nano Banana Pro is slower and more expensive than the standard model, but produces significantly better results for professional use cases.
+Note: Nano Banana Pro is slower and more expensive than the other models, but produces significantly better results for professional use cases.
 
 ### Edit an existing image
 
@@ -97,22 +113,19 @@ nanobanana generate -i input.png output.png "make the sky more purple"
 
 ## Examples
 
-```bash
-# Generate a photorealistic image (PNG)
-nanobanana generate photo.png "a photorealistic portrait of a cat"
+Prompt: "a banana wearing a tiny top hat, photorealistic"
 
-# Generate a JPEG image
-nanobanana generate photo.jpg "a photorealistic portrait of a cat"
+### Nano Banana
 
-# Edit an image
-nanobanana generate -i photo.png edited.png "add sunglasses to the cat"
+![Nano Banana example](examples/nano-banana.png)
 
-# Use Nano Banana Pro for high-quality professional images
-nanobanana generate -pro output.png "modern infographic about climate change with legible text"
+### Nano Banana 2
 
-# Edit with Nano Banana Pro for better results
-nanobanana generate -pro -i logo.png logo-wizard.png "add a little wizard hat to the banana"
-```
+![Nano Banana 2 example](examples/nano-banana-2.png)
+
+### Nano Banana Pro
+
+![Nano Banana Pro example](examples/nano-banana-pro.png)
 
 ## How it works
 

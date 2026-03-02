@@ -11,6 +11,7 @@ import (
 
 const (
 	ModelNanoBanana    = "gemini-2.5-flash-image"
+	ModelNanoBanana2   = "gemini-3.1-flash-image-preview"
 	ModelNanoBananaPro = "gemini-3-pro-image-preview"
 )
 
@@ -40,7 +41,7 @@ type GenerateRequest struct {
 	Prompt         string
 	InputImage     io.Reader
 	OutputMIMEType string
-	Model          string // Model to use (ModelNanoBanana or ModelNanoBananaPro)
+	Model          string // Model to use (ModelNanoBanana, ModelNanoBanana2, or ModelNanoBananaPro)
 }
 
 // GenerateResponse represents the response from image generation.
