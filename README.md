@@ -113,25 +113,19 @@ nanobanana generate -i input.png output.png "make the sky more purple"
 
 ## Examples
 
-```bash
-# Generate a photorealistic image (PNG)
-nanobanana generate photo.png "a photorealistic portrait of a cat"
+Prompt: "a banana wearing a tiny top hat, photorealistic"
 
-# Generate a JPEG image
-nanobanana generate photo.jpg "a photorealistic portrait of a cat"
+### Nano Banana
 
-# Edit an image
-nanobanana generate -i photo.png edited.png "add sunglasses to the cat"
+![Nano Banana example](examples/nano-banana.png)
 
-# Use Nano Banana 2 for improved quality
-nanobanana generate -v2 output.png "a vibrant coral reef with tropical fish"
+### Nano Banana 2
 
-# Use Nano Banana Pro for high-quality professional images
-nanobanana generate -pro output.png "modern infographic about climate change with legible text"
+![Nano Banana 2 example](examples/nano-banana-2.png)
 
-# Edit with Nano Banana Pro for better results
-nanobanana generate -pro -i logo.png logo-wizard.png "add a little wizard hat to the banana"
-```
+### Nano Banana Pro
+
+![Nano Banana Pro example](examples/nano-banana-pro.png)
 
 ## How it works
 
