@@ -1,6 +1,6 @@
 # nanobanana
 
-<img src="logo.png" alt="Logo" width="300" align="right">
+<img src="logo.jpg" alt="Logo" width="300" align="right">
 
 [![Docs](https://pkg.go.dev/badge/maragu.dev/nanobanana)](https://pkg.go.dev/maragu.dev/nanobanana)
 
@@ -86,4 +86,4 @@ Prompt: "a banana wearing a tiny top hat, photorealistic"
 
 Here's a visual overview of how the CLI works internally:
 
-![Architecture diagram](architecture.png)
+![Architecture diagram](architecture.jpg)
