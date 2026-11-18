@@ -183,3 +183,39 @@ The live API returned JPEG already, so the real run never exercised the conversi
 
 ### Future work
 Update the fabrik `nanobanana` skill for the removed flags and for the JPEG-only output (it likely shows `.png` examples).
+
+## Step 5: README text fixes and image candidates
+
+**Author:** builder
+
+### Prompt Context
+
+**Verbatim prompt:** Follow-up in the nanobanana Go CLI. [...] Part A: README text fixes (commit these). In /README.md: 1. The intro says "Google's Gemini image generation models (Nano Banana 2.1)". Make it singular and natural. 2. Under "Generate an image" there's a "Nano Banana 2.1 offers:" list. It advertises model capabilities the CLI doesn't expose: 14 reference images (the CLI takes one `-i`), 1K/2K/4K output, and wide aspect ratios (there are no flags for these). Remove the list. [...] 3. Change the API key link from https://makersuite.google.com/app/apikey to https://aistudio.google.com/apikey, in both the README and the error message in /main.go. 4. Leave the logo and architecture image references alone for now. [...] Part B: generate image candidates (don't commit). [...] (The full brief is longer; this quotes Part A and summarizes Part B.)
+**Interpretation:** Make the README match what the CLI actually does, fix the API key link, and produce candidate replacements for the stale logo and architecture images for Markus to choose from.
+**Inferred intent:** A README that does not promise features the CLI lacks, and project images that match the current CLI.
+
+### What I did
+- `/README.md`: the intro now reads "using Nano Banana 2.1, Google's Gemini image generation model." The "Nano Banana 2.1 offers:" list is gone. The API key link points at https://aistudio.google.com/apikey.
+- `/main.go`: the missing-key error message uses the same link.
+- Part B, not committed: I built the CLI and generated 3 logo and 2 architecture candidates into the session scratchpad with prompts I wrote, then opened each with the Read tool.
+
+### Why
+The removed list advertised 14 reference images, 1K/2K/4K output, and wide aspect ratios, and the CLI has no flag for any of them. The old makersuite.google.com link is the pre-rename Google AI Studio address.
+
+### What worked
+All five generations succeeded on the first try with no retries. Every text label in both architecture candidates came out spelled exactly as in the prompt, including `GOOGLE_API_KEY`, `generateHandler`, `GenerateRequest` and `gemini-nano-banana-2.1`.
+
+### What didn't work
+Nothing failed.
+
+### What I learned
+The model renders long lowercase identifiers with underscores and dots reliably when the exact labels are quoted in the prompt and the prompt says to spell them exactly.
+
+### What was tricky
+The minimal logo prompt produced a banana with a visibly crude shape, so "minimal" and "cute" pull against each other.
+
+### What warrants review
+`go build` and `go test` are not affected by the README change; the `/main.go` change is a string literal only. The candidates are not in the repo, so Markus must pick and copy them in.
+
+### Future work
+Replace `/logo.png` and `/architecture.png` with the chosen candidates (as `.jpg`, and update the README references). Update the fabrik `nanobanana` skill (carried over from earlier steps).

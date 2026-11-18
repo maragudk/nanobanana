@@ -28,7 +28,7 @@ func main() {
 	if apiKey == "" {
 		fmt.Fprintf(os.Stderr, "Error: GOOGLE_API_KEY environment variable is required\n\n")
 		fmt.Fprintf(os.Stderr, "To use nanobanana, you need a Google API key:\n")
-		fmt.Fprintf(os.Stderr, "  1. Get your API key from https://makersuite.google.com/app/apikey\n")
+		fmt.Fprintf(os.Stderr, "  1. Get your API key from https://aistudio.google.com/apikey\n")
 		fmt.Fprintf(os.Stderr, "  2. Set it as an environment variable:\n")
 		fmt.Fprintf(os.Stderr, "       export GOOGLE_API_KEY=\"your-api-key-here\"\n")
 		fmt.Fprintf(os.Stderr, "  3. Or create a .env file:\n")

@@ -4,7 +4,7 @@
 
 [![Docs](https://pkg.go.dev/badge/maragu.dev/nanobanana)](https://pkg.go.dev/maragu.dev/nanobanana)
 
-A Go CLI tool for generating and editing images using Google's Gemini image generation models (Nano Banana 2.1).
+A Go CLI tool for generating and editing images using Nano Banana 2.1, Google's Gemini image generation model.
 
 ⚠️ THIS APP IS VIBE-CODED BY AN AI, USE AT YOUR OWN RISK! ⚠️
 
@@ -42,7 +42,7 @@ GOOGLE_API_KEY=your-google-api-key-here
 
 The CLI will automatically load the `.env` file if it exists.
 
-Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey).
+Get your API key from [Google AI Studio](https://aistudio.google.com/apikey).
 
 ## Supported Formats
 
@@ -67,14 +67,6 @@ Generate an image from a text prompt:
 ```bash
 nanobanana generate output.jpg "a beautiful sunset over mountains"
 ```
-
-Nano Banana 2.1 offers:
-- Better image quality and prompt adherence than the previous generation
-- Better character consistency
-- Better text rendering
-- Up to 14 reference images
-- 1K, 2K, and 4K output
-- Wide aspect ratios, up to 8:1
 
 ### Edit an existing image
 
