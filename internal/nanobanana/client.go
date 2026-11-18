@@ -9,11 +9,8 @@ import (
 	google "maragu.dev/gai-google"
 )
 
-const (
-	ModelNanoBanana    = "gemini-2.5-flash-image"
-	ModelNanoBanana2   = "gemini-3.1-flash-image-preview"
-	ModelNanoBananaPro = "gemini-3-pro-image-preview"
-)
+// model is the Nano Banana 2.1 model ID, used for all image generation.
+const model = "gemini-nano-banana-2.1"
 
 // Client is a Nano Banana API client.
 type Client struct {
@@ -41,7 +38,6 @@ type GenerateRequest struct {
 	Prompt         string
 	InputImage     io.Reader
 	OutputMIMEType string
-	Model          string // Model to use (ModelNanoBanana, ModelNanoBanana2, or ModelNanoBananaPro)
 }
 
 // GenerateResponse represents the response from image generation.
@@ -85,12 +81,6 @@ func (c *Client) Generate(ctx context.Context, req GenerateRequest) (*GenerateRe
 	// Note: Output image format is not configurable in GenerateContent API
 	// Images are returned in a default format
 
-	// Use the specified model, default to Nano Banana if not set
-	model := req.Model
-	if model == "" {
-		model = ModelNanoBanana
-	}
-
 	// Generate image
 	resp, err := c.genaiClient.Models.GenerateContent(ctx, model, contents, config)
 	if err != nil {
@@ -124,4 +114,3 @@ func (c *Client) Generate(ctx context.Context, req GenerateRequest) (*GenerateRe
 
 	return &GenerateResponse{Images: images}, nil
 }
-

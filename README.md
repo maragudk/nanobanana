@@ -4,7 +4,7 @@
 
 [![Docs](https://pkg.go.dev/badge/maragu.dev/nanobanana)](https://pkg.go.dev/maragu.dev/nanobanana)
 
-A Go CLI tool for generating and editing images using Google's Gemini image generation models (Nano Banana and Nano Banana Pro).
+A Go CLI tool for generating and editing images using Google's Gemini image generation models (Nano Banana 2.1).
 
 ⚠️ THIS APP IS VIBE-CODED BY AN AI, USE AT YOUR OWN RISK! ⚠️
 
@@ -26,11 +26,7 @@ go build
 
 ## Configuration
 
-This tool uses Google's Gemini API with three image generation models:
-
-- **Nano Banana** (`gemini-2.5-flash-image`) - Fast, cost-effective image generation (default)
-- **Nano Banana 2** (`gemini-3.1-flash-image-preview`) - Improved quality, extended aspect ratios (up to 8:1), resolution options (0.5K-4K), and search grounding
-- **Nano Banana Pro** (`gemini-3-pro-image-preview`) - Highest quality with advanced features like better text rendering, higher resolution (up to 4K), and Google Search grounding
+This tool uses Google's Gemini API with Nano Banana 2.1 (`gemini-nano-banana-2.1`), the newest Nano Banana model, with Flash-level speed and cost.
 
 Set your Google API key as an environment variable:
 
@@ -72,36 +68,13 @@ Generate an image from a text prompt:
 nanobanana generate output.png "a beautiful sunset over mountains"
 ```
 
-### Use Nano Banana 2 for improved quality
-
-Use the `-v2` flag to generate images with Nano Banana 2, the upgraded flash model:
-
-```bash
-nanobanana generate -v2 output.png "a beautiful sunset over mountains"
-```
-
-Nano Banana 2 offers over the standard model:
-- Improved image quality and consistency
-- Extended aspect ratios (1:4, 4:1, 1:8, 8:1)
-- Resolution options (0.5K, 1K, 2K, 4K)
-- Search grounding support
-- Improved i18n text rendering
-
-### Use Nano Banana Pro for highest quality
-
-Use the `-pro` flag to generate images with Nano Banana Pro for the highest quality output:
-
-```bash
-nanobanana generate -pro output.png "professional product photo"
-```
-
-Nano Banana Pro is recommended when you need:
-- High-resolution output (up to 4K)
-- Legible text in images (infographics, menus, diagrams)
-- Professional-quality images
-- Complex multi-turn editing workflows
-
-Note: Nano Banana Pro is slower and more expensive than the other models, but produces significantly better results for professional use cases.
+Nano Banana 2.1 offers:
+- Better image quality and prompt adherence than the previous generation
+- Better character consistency
+- Better text rendering
+- Up to 14 reference images
+- 1K, 2K, and 4K output
+- Wide aspect ratios, up to 8:1
 
 ### Edit an existing image
 
@@ -115,17 +88,7 @@ nanobanana generate -i input.png output.png "make the sky more purple"
 
 Prompt: "a banana wearing a tiny top hat, photorealistic"
 
-### Nano Banana
-
-![Nano Banana example](examples/nano-banana.png)
-
-### Nano Banana 2
-
-![Nano Banana 2 example](examples/nano-banana-2.png)
-
-### Nano Banana Pro
-
-![Nano Banana Pro example](examples/nano-banana-pro.png)
+![Nano Banana 2.1 example](examples/nano-banana-2.1.png)
 
 ## How it works
 
