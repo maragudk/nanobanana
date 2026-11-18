@@ -35,9 +35,8 @@ func (c *Client) WithGenAIClient(client *genai.Client) *Client {
 
 // GenerateRequest represents a request to generate an image.
 type GenerateRequest struct {
-	Prompt         string
-	InputImage     io.Reader
-	OutputMIMEType string
+	Prompt     string
+	InputImage io.Reader
 }
 
 // GenerateResponse represents the response from image generation.

@@ -142,3 +142,44 @@ The `/examples` directory had been removed from git in Step 2, so I had to recre
 
 ### Future work
 Decide what to do about the extension and format mismatch. Update the fabrik `nanobanana` skill for the removed flags (carried over from Step 2).
+
+## Step 4: Make the output JPEG only
+
+**Author:** builder
+
+### Prompt Context
+
+**Verbatim prompt:** Follow-up change in the nanobanana Go CLI, to go into open PR #22. [...] The CLI now uses only `gemini-nano-banana-2.1`. That model returns JPEG bytes even when the output path ends in `.png`, and the CLI writes the bytes unchanged. So `nanobanana generate out.png ...` produces a JPEG named `.png`. [...] Decision (from Markus): output is JPEG only. (1) The output path must end in `.jpg` or `.jpeg`, case-insensitive. Anything else [...] makes the CLI return a clear error before it calls the API. [...] (2) The CLI always writes JPEG. If the API returns image data that isn't JPEG [...] decode it with the Go standard library [...] and re-encode it with `image/jpeg`. [...] (3) Delete what is now dead: `mimeTypeFromExtension`, `nanobanana.GenerateRequest.OutputMIMEType` [...] (4) `git mv examples/nano-banana-2.1.png examples/nano-banana-2.1.jpg` [...] (5) README: rewrite the "Supported Formats" section [...]. (The full brief is longer; this quotes its core.)
+**Interpretation:** Stop pretending the CLI supports PNG output. Validate the extension up front, and guarantee that the file written is JPEG.
+**Inferred intent:** A file's extension always matches its content, with no format flags or quality settings.
+
+### What I did
+- `/main.go`: added `validateOutputPath` (extension must be `.jpg` or `.jpeg`, case-insensitive) and call it in `generateHandler` right after the argument count check, so it runs before the input image is read and before any API call. Added `toJPEG`, which returns the bytes unchanged when they start with the JPEG magic `FF D8 FF`, and otherwise decodes with `image.Decode` (with `image/png` registered by a blank import) and re-encodes with `jpeg.Encode`. Decode failure is returned as an error. Help text now shows `.jpg` output paths and has an "Output" note.
+- Deleted `mimeTypeFromExtension` and `nanobanana.GenerateRequest.OutputMIMEType`. It was only set in `/main.go` and never read in `/internal/nanobanana/client.go`, which already notes that the output format is not configurable.
+- `/main_test.go`: replaced `TestMimeTypeFromExtension` with `TestValidateOutputPath` (table) and `TestToJPEG`. The PNG case encodes a 4x3 PNG in the test and checks that the output decodes as `jpeg` with the same size.
+- `git mv examples/nano-banana-2.1.png examples/nano-banana-2.1.jpg`; the bytes were not touched.
+- `/README.md`: rewrote "Supported Formats", changed the generate and `-i` example output paths to `.jpg`, and pointed the example image link at the `.jpg`.
+
+### Why
+The extension said PNG while the content was JPEG. Markus chose one format over a conversion matrix.
+
+### What worked
+Sniffing the bytes beats the MIME type here: `Client.Generate` returns only raw bytes, so using the inline data's MIME type would have meant widening `GenerateResponse`. `go test -shuffle on ./...` passes and `golangci-lint run` reports 0 issues. `GOOGLE_API_KEY=fake ./nanobanana generate out.png "x"` exits 1 with `Error: output path "out.png" must end in .jpg or .jpeg, because the output is always JPEG`. A fake key proves no API call is needed, since the error came back immediately. A real generation to a `.jpg` path in the scratchpad succeeded, and `file` reported `JPEG image data, JFIF standard 1.01, ... 1376x768`.
+
+### What didn't work
+Nothing failed. My first multi-step shell command (a python heredoc plus several commands) was refused by the sandbox as too complex to verify, so I split it into separate Edit calls.
+
+### What I learned
+The API key check in `main()` runs before routing, so without any `GOOGLE_API_KEY` the user sees the missing-key message even for a bad path. That is existing behavior, and I left it.
+
+### What was tricky
+The live API returned JPEG already, so the real run never exercised the conversion branch. Only the unit test covers it.
+
+### What warrants review
+- `toJPEG` re-encodes with the default JPEG quality (75); the brief ruled out quality settings, so I left it. Self-review (competing reviewers via the code-review skill) found that JPEG has no alpha channel, so a transparent PNG would come out black. I fixed that by compositing onto white first, with a test. Only PNG decoding is registered, so a WebP response would fail with `image: unknown format`; I narrowed the README claim to PNG instead of adding a dependency.
+- Self-review also flagged things that already existed or that the brief decided, and I left them: `/internal/nanobanana/client.go` reads `imageData[1]` after checking only `len(imageData) > 0` (a 1-byte input image panics) and labels every non-JPEG input `image/png`; a missing output directory only fails at `os.WriteFile`, after the paid API call; old `.png` scripts now fail by design.
+- `/internal/nanobanana/client.go` still defaults the input image MIME type to `image/png` when the bytes are not JPEG. That is the input side, which stays unrestricted, so it is not stale.
+- The README keeps `input.png` in the `-i` example, because inputs may be any format.
+
+### Future work
+Update the fabrik `nanobanana` skill for the removed flags and for the JPEG-only output (it likely shows `.png` examples).

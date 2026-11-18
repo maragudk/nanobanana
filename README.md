@@ -46,17 +46,17 @@ Get your API key from [Google AI Studio](https://makersuite.google.com/app/apike
 
 ## Supported Formats
 
-The CLI automatically detects the output format from the file extension:
+The output is always JPEG. The output path must end in `.jpg` or `.jpeg` (in any case). Any other extension, or none, makes the CLI exit with an error before it calls the API.
 
-- **PNG** (`.png`) - Default format, lossless compression
-- **JPEG** (`.jpg`, `.jpeg`) - Lossy compression, smaller file sizes
-
-If no extension is provided, PNG format is used by default.
+If the API returns a PNG instead of a JPEG, the CLI converts it to JPEG before writing it. Transparent areas become white.
 
 ```bash
-nanobanana generate image.png "a sunset"  # PNG format
-nanobanana generate image.jpg "a sunset"  # JPEG format
+nanobanana generate image.jpg "a sunset"   # works
+nanobanana generate image.jpeg "a sunset"  # works
+nanobanana generate image.png "a sunset"   # error: output path must end in .jpg or .jpeg
 ```
+
+Input images for editing (`-i`) can be in any format the API accepts.
 
 ## Usage
 
@@ -65,7 +65,7 @@ nanobanana generate image.jpg "a sunset"  # JPEG format
 Generate an image from a text prompt:
 
 ```bash
-nanobanana generate output.png "a beautiful sunset over mountains"
+nanobanana generate output.jpg "a beautiful sunset over mountains"
 ```
 
 Nano Banana 2.1 offers:
@@ -81,14 +81,14 @@ Nano Banana 2.1 offers:
 Edit an image using natural language instructions:
 
 ```bash
-nanobanana generate -i input.png output.png "make the sky more purple"
+nanobanana generate -i input.png output.jpg "make the sky more purple"
 ```
 
 ## Examples
 
 Prompt: "a banana wearing a tiny top hat, photorealistic"
 
-![Nano Banana 2.1 example](examples/nano-banana-2.1.png)
+![Nano Banana 2.1 example](examples/nano-banana-2.1.jpg)
 
 ## How it works
 

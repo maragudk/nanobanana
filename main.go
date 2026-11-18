@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/jpeg"
+	_ "image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -54,10 +59,13 @@ func helpHandler(ctx clir.Context) error {
 	ctx.Println("")
 	ctx.Println("Examples:")
 	ctx.Println("  # Generate an image")
-	ctx.Println("  nanobanana generate output.png \"a beautiful sunset over mountains\"")
+	ctx.Println("  nanobanana generate output.jpg \"a beautiful sunset over mountains\"")
 	ctx.Println("")
 	ctx.Println("  # Edit an existing image")
-	ctx.Println("  nanobanana generate -i input.png output.png \"make the sky purple\"")
+	ctx.Println("  nanobanana generate -i input.png output.jpg \"make the sky purple\"")
+	ctx.Println("")
+	ctx.Println("Output:")
+	ctx.Println("  The output is always JPEG. The output path must end in .jpg or .jpeg.")
 	ctx.Println("")
 	ctx.Println("Flags:")
 	ctx.Println("  -i string     Input image path for editing")
@@ -84,10 +92,11 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 		outputPath := fs.Arg(0)
 		prompt := fs.Arg(1)
 
-		req := nanobanana.GenerateRequest{
-			Prompt:         prompt,
-			OutputMIMEType: mimeTypeFromExtension(outputPath),
+		if err := validateOutputPath(outputPath); err != nil {
+			return err
 		}
+
+		req := nanobanana.GenerateRequest{Prompt: prompt}
 
 		// If -i flag is set, read the input image
 		if *inputImage != "" {
@@ -107,8 +116,13 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 			return errors.New("no images returned from API")
 		}
 
+		imageData, err := toJPEG(resp.Images[0])
+		if err != nil {
+			return errors.Wrap(err, "failed to convert image to JPEG")
+		}
+
 		// Write the first image to the output path
-		if err := os.WriteFile(outputPath, resp.Images[0], 0644); err != nil {
+		if err := os.WriteFile(outputPath, imageData, 0644); err != nil {
 			return errors.Wrap(err, "failed to write output image")
 		}
 
@@ -122,17 +136,35 @@ func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 	}
 }
 
-// mimeTypeFromExtension returns the MIME type based on the file extension.
-// Supported formats: png (default), jpg/jpeg
-func mimeTypeFromExtension(filename string) string {
-	ext := strings.ToLower(filepath.Ext(filename))
-	switch ext {
+// validateOutputPath returns an error unless path ends in .jpg or .jpeg, in any case.
+func validateOutputPath(path string) error {
+	switch strings.ToLower(filepath.Ext(path)) {
 	case ".jpg", ".jpeg":
-		return "image/jpeg"
-	case ".png":
-		return "image/png"
-	default:
-		// Default to PNG if extension is unknown or missing
-		return "image/png"
+		return nil
 	}
+	return errors.Newf("output path %q must end in .jpg or .jpeg, because the output is always JPEG", path)
+}
+
+// toJPEG returns data unchanged if it already is JPEG, and otherwise decodes it (PNG is supported) and re-encodes it as JPEG.
+// Sniffing the bytes is more reliable than a MIME type, which [nanobanana.Client.Generate] does not return.
+func toJPEG(data []byte) ([]byte, error) {
+	if bytes.HasPrefix(data, []byte{0xFF, 0xD8, 0xFF}) {
+		return data, nil
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode image")
+	}
+
+	// JPEG has no alpha channel, so composite onto white instead of letting transparent pixels turn black.
+	flat := image.NewRGBA(img.Bounds())
+	draw.Draw(flat, flat.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+	draw.Draw(flat, flat.Bounds(), img, img.Bounds().Min, draw.Over)
+
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, flat, nil); err != nil {
+		return nil, errors.Wrap(err, "failed to encode JPEG")
+	}
+	return buf.Bytes(), nil
 }
