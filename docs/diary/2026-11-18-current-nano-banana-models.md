@@ -107,3 +107,38 @@ The scope shrank twice while I was working. The `selectModel` function and its t
 
 ### Future work
 Generate `/examples/nano-banana-2.1.png` with the default model once the API credits are back, and confirm the model ID works. Then update the fabrik `nanobanana` skill for the removed flags.
+
+## Step 3: Generate the 2.1 example image
+
+**Author:** builder
+
+### Prompt Context
+
+**Verbatim prompt:** Small follow-up task in the nanobanana Go CLI. Work in the current worktree: /Users/maragubot/Developer/nanobanana/.claude/worktrees/nanobanana-2-1, branch `worktree-nanobanana-2-1`. Commit 9f1dcc7 switched the CLI to Nano Banana 2.1 only: `const model = "gemini-nano-banana-2.1"` in /internal/nanobanana/client.go. The README's Examples section links `examples/nano-banana-2.1.png`, which doesn't exist yet. The previous attempt to generate it failed with a 402 "prepayment credits are depleted" error. Markus has since topped up the balance. (Task: build the CLI, generate `examples/nano-banana-2.1.png` with the prompt "a banana wearing a tiny top hat, photorealistic", stop and report on failure, check the image, append this step to the diary, commit the image and the diary together without pushing.)
+**Interpretation:** Retry the generation that failed in Step 2, now that the billing problem is fixed, and commit the result.
+**Inferred intent:** Confirm that `gemini-nano-banana-2.1` works against the live API, and give the README's Examples section the image it links to.
+
+### What I did
+Built the CLI with `go build -o nanobanana .`, created `/examples`, and ran `./nanobanana generate examples/nano-banana-2.1.png "a banana wearing a tiny top hat, photorealistic"` with the API key sourced from the main checkout's `.env` through `/bin/zsh -c 'set -a; source ...; set +a; ...'`. The key was not printed or copied. I opened the result with the Read tool. `/nanobanana` is in `/.gitignore`, so the binary stays out of the commit.
+
+### Why
+Step 2 left the README pointing at a missing image, and the live model ID was still unverified.
+
+### What worked
+Generation succeeded on the first try: `Successfully generated image: examples/nano-banana-2.1.png`. So `gemini-nano-banana-2.1` is a valid model ID on the live API, and the 402 was only a billing problem. The file is 1376x768 and 739841 bytes. It shows a yellow banana lying on a wooden kitchen counter, with a small black felt top hat on its top end, and a blurred kitchen background. That matches the prompt.
+
+### What didn't work
+Nothing failed in this step.
+
+### What I learned
+`file examples/nano-banana-2.1.png` reports `JPEG image data, JFIF standard 1.01 ... 1376x768`. The API returned JPEG bytes and the CLI wrote them unchanged to a `.png` path. Viewers and the README render it fine because they sniff the content, but the extension does not match the format. The CLI passes `OutputMIMEType` from the file extension as a request hint, so the model ignored it or the hint does not apply to this model.
+
+### What was tricky
+The `/examples` directory had been removed from git in Step 2, so I had to recreate it before the CLI could write the file.
+
+### What warrants review
+- Open `/examples/nano-banana-2.1.png` and check that it fits the README's Examples section.
+- The PNG-named file is JPEG data (see "What I learned"). Decide whether to leave it, or to convert it, or to make the CLI convert output to the requested format.
+
+### Future work
+Decide what to do about the extension and format mismatch. Update the fabrik `nanobanana` skill for the removed flags (carried over from Step 2).
