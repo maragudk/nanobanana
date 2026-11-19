@@ -10,6 +10,7 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -57,6 +58,9 @@ func helpHandler(ctx clir.Context) error {
 	ctx.Println("Usage:")
 	ctx.Println("  nanobanana generate [flags] <output-path> <prompt>")
 	ctx.Println("")
+	ctx.Println("  Flags must come before the output path. Put the prompt in quotes.")
+	ctx.Println("  Any extra argument after the prompt, such as a flag, is a usage error.")
+	ctx.Println("")
 	ctx.Println("Commands:")
 	ctx.Println("  generate    Generate or edit images")
 	ctx.Println("")
@@ -93,6 +97,9 @@ func helpHandler(ctx clir.Context) error {
 func generateHandler(client *nanobanana.Client) clir.RunnerFunc {
 	return func(ctx clir.Context) error {
 		opts, err := parseGenerateArgs(ctx.Args)
+		if errors.Is(err, flag.ErrHelp) {
+			return helpHandler(ctx)
+		}
 		if err != nil {
 			return err
 		}
@@ -174,14 +181,20 @@ func (s *stringsFlag) Set(value string) error {
 }
 
 // parseGenerateArgs for the generate command and validate them, without touching the file system or the network.
+// If help is asked for with -h or -help, the error is [flag.ErrHelp].
 func parseGenerateArgs(args []string) (generateOptions, error) {
 	fs := flag.NewFlagSet("generate", flag.ContinueOnError)
+	// Silence the flag package, so -h doesn't print its own usage and each error is only printed once, by the caller.
+	fs.SetOutput(io.Discard)
 	var inputPaths stringsFlag
 	fs.Var(&inputPaths, "i", fmt.Sprintf("input image path, repeat for up to %v images", maxInputImages))
 	aspectRatio := fs.String("aspect", "", "aspect ratio, such as 1:1 or 16:9")
 	imageSize := fs.String("size", "", "image size: "+strings.Join(imageSizes, ", "))
 
 	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return generateOptions{}, err
+		}
 		return generateOptions{}, errors.Wrap(err, "failed to parse flags")
 	}
 

@@ -115,3 +115,40 @@ I declined one point that both reviewers raised as moderate or optional: moving 
 
 ### Future work
 None needed for this feature. If Google adds `image/png` to `response_format.mime_type` (or lifts the SDK's `outputMimeType` block), the CLI could request PNG natively and skip the conversion.
+
+## Step 3: Document flag order in the help, and fix `generate -h` and doubled flag errors
+
+**Author:** builder
+
+### Prompt Context
+
+**Verbatim prompt:** Small fix in the nanobanana Go CLI. [...] 1. **Flag order in the help.** The help text in /main.go (`helpHandler`) doesn't say that flags must come before the output path and the prompt should be quoted, but `parseGenerateArgs` now errors when they aren't. Add a short note under Usage [...] 2. **`nanobanana generate -h`.** Right now this prints Go's default flag usage ("Usage of generate: ...") and then `Error: failed to parse flags: flag: help requested`, with a failure exit. Make `generate -h` and `generate --help` print the same full help as `nanobanana help` and exit successfully. [...] While you're there, check whether flag errors are printed twice [...] 3. Keep everything else as it is: no new flags, and no help wording changes beyond the note. (Abridged.)
+**Interpretation:** Add the two-line note to the help, route `-h`/`--help` on `generate` to `helpHandler`, and make the flag package stay silent so each error prints once.
+**Inferred intent:** Close the two rough edges the Step 2 self-review left alone, without growing the CLI.
+
+### What I did
+In `/main.go`, `helpHandler` now has a note under Usage, mirroring the README: "Flags must come before the output path. Put the prompt in quotes." and "Any extra argument after the prompt, such as a flag, is a usage error." `parseGenerateArgs` calls `fs.SetOutput(io.Discard)` and returns `flag.ErrHelp` unwrapped; `generateHandler` checks `errors.Is(err, flag.ErrHelp)` and returns `helpHandler(ctx)`. Tests are in `/main_test.go`: `parseGenerateArgs` returns `flag.ErrHelp` for `-h`, `-help` and `--help`; `generateHandler` prints the same text as `helpHandler` with no error and no API call; a bad flag prints nothing from the handler or the flag package; and a `captureStderr` helper swaps `os.Stderr` for a file to check this.
+
+### Why
+The README already documented the flag order, and Step 2 made the CLI enforce it, so the help was the one place that didn't say so. A user who types `generate -h` expects help, not an error.
+
+### What worked
+Writing the tests first and disabling just the `SetOutput` line showed all three new output tests failing, so they do guard the fix. Flag errors were indeed printed twice: with `flag.ContinueOnError` and the default output, the flag package wrote the message and "Usage of generate:" to stderr, and `clir.Run` then printed `Error: ...` for the returned error. With the flag output discarded, `clir.Run` is the only printer.
+
+### What didn't work
+A first attempt to apply the edits with a Python heredoc and a chained `go doc | grep; go build` was refused by the sandbox as too complex to verify, so I used the edit tool and separate commands.
+
+### What I learned
+`flag.FlagSet` reads `os.Stderr` at print time when no output is set, so a test can swap `os.Stderr` to detect stray writes.
+
+### What was tricky
+Silencing the flag package also drops its list of valid flags on a bad flag. The error is now just `Error: failed to parse flags: flag provided but not defined: -nope`. I left it that way, since the brief said no help wording changes, and `generate -h` shows the flags.
+
+### Self-review
+The diff is small and I checked the cases directly: `-h`, `-help` and `--help` all work, a flag error prints once, and non-flag errors such as the invalid aspect ratio are unchanged. I did not run the competing-reviewer skill for a change of this size. A `-h` after other valid flags (`generate -size 4K -h`) also shows help, which is what the flag package does and seems right.
+
+### What warrants review
+The `errors.Is(err, flag.ErrHelp)` branch in `generateHandler` and the `SetOutput` line in `parseGenerateArgs`.
+
+### Future work
+None. If the lost valid-flags list on a bad flag turns out to matter, the error could point at `nanobanana generate -h`.

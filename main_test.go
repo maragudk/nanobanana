@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -65,6 +67,26 @@ func TestParseGenerateArgs(t *testing.T) {
 		_, err := parseGenerateArgs([]string{"out.jpg", "a", "sunset"})
 		if err == nil || !strings.Contains(err.Error(), "usage:") {
 			t.Errorf("err = %v, expected a usage error", err)
+		}
+	})
+
+	t.Run("should return flag.ErrHelp for -h, -help, and --help", func(t *testing.T) {
+		for _, arg := range []string{"-h", "-help", "--help"} {
+			_, err := parseGenerateArgs([]string{arg})
+			if !errors.Is(err, flag.ErrHelp) {
+				t.Errorf("%v: err = %v, expected flag.ErrHelp", arg, err)
+			}
+		}
+	})
+
+	t.Run("should not let the flag package print anything itself", func(t *testing.T) {
+		stderr := captureStderr(t, func() {
+			_, _ = parseGenerateArgs([]string{"-h"})
+			_, _ = parseGenerateArgs([]string{"-nope", "out.jpg", "p"})
+			_, _ = parseGenerateArgs([]string{"-size"})
+		})
+		if stderr != "" {
+			t.Errorf("stderr = %q, expected nothing", stderr)
 		}
 	})
 
@@ -417,7 +439,72 @@ func TestReadInputImage(t *testing.T) {
 	})
 }
 
+func TestHelpHandler(t *testing.T) {
+	t.Run("should say that flags go before the output path and the prompt should be quoted", func(t *testing.T) {
+		var out strings.Builder
+
+		if err := helpHandler(clir.Context{Out: &out}); err != nil {
+			t.Fatal(err)
+		}
+
+		for _, expected := range []string{"Flags must come before the output path.", "Put the prompt in quotes."} {
+			if !strings.Contains(out.String(), expected) {
+				t.Errorf("help = %q, expected it to contain %q", out.String(), expected)
+			}
+		}
+	})
+}
+
 func TestGenerateHandler(t *testing.T) {
+	t.Run("should print the full help and succeed for -h and --help, without calling the API", func(t *testing.T) {
+		client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+			t.Errorf("unexpected API request to %v", r.URL.Path)
+			w.WriteHeader(http.StatusInternalServerError)
+		})
+
+		var expected strings.Builder
+		if err := helpHandler(clir.Context{Out: &expected}); err != nil {
+			t.Fatal(err)
+		}
+
+		for _, arg := range []string{"-h", "-help", "--help"} {
+			var out, errOut strings.Builder
+			stderr := captureStderr(t, func() {
+				err := generateHandler(client)(clir.Context{Args: []string{arg}, Ctx: t.Context(), Out: &out, Err: &errOut})
+				if err != nil {
+					t.Errorf("%v: err = %v, expected nil", arg, err)
+				}
+			})
+
+			if out.String() != expected.String() {
+				t.Errorf("%v: out = %q, expected the same as the help command, %q", arg, out.String(), expected.String())
+			}
+			if errOut.String() != "" || stderr != "" {
+				t.Errorf("%v: stderr = %q and %q, expected nothing", arg, errOut.String(), stderr)
+			}
+		}
+	})
+
+	t.Run("should return a flag error without anything else printing it", func(t *testing.T) {
+		client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+			t.Errorf("unexpected API request to %v", r.URL.Path)
+			w.WriteHeader(http.StatusInternalServerError)
+		})
+
+		var out, errOut strings.Builder
+		stderr := captureStderr(t, func() {
+			err := generateHandler(client)(clir.Context{Args: []string{"-nope", "out.jpg", "p"}, Ctx: t.Context(), Out: &out, Err: &errOut})
+			if err == nil || !strings.Contains(err.Error(), "flag provided but not defined: -nope") {
+				t.Errorf("err = %v, expected an error about the undefined flag", err)
+			}
+		})
+
+		// The error is printed once by clir.Run, from the returned error, so the handler and the flag package stay quiet.
+		if out.String() != "" || errOut.String() != "" || stderr != "" {
+			t.Errorf("out = %q, err = %q, stderr = %q, expected nothing printed", out.String(), errOut.String(), stderr)
+		}
+	})
+
 	t.Run("should write the final image, not the thought image, converted to the output format", func(t *testing.T) {
 		thought := encodeJPEG(t, image.NewRGBA(image.Rect(0, 0, 2, 2)))
 		final := encodeJPEG(t, testImage())
@@ -493,6 +580,29 @@ func TestGenerateHandler(t *testing.T) {
 			}
 		})
 	}
+}
+
+// captureStderr returns everything written to [os.Stderr] while f runs.
+func captureStderr(t *testing.T, f func()) string {
+	t.Helper()
+
+	file, err := os.CreateTemp(t.TempDir(), "stderr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = file.Close() }()
+
+	original := os.Stderr
+	os.Stderr = file
+	defer func() { os.Stderr = original }()
+
+	f()
+
+	data, err := os.ReadFile(file.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
 }
 
 // newTestClient returns a [nanobanana.Client] that sends its requests to a test server with the given handler.
